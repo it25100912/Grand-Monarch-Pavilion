@@ -6,6 +6,8 @@ public class ResourceRequest {
 
     @NotBlank(message = "Resource / equipment name is required")
     @Size(min = 2, max = 100, message = "Equipment name must be between 2 and 100 characters")
+    @Pattern(regexp = "^[a-zA-Z\\s.']+$",
+             message = "Equipment name can only contain letters and spaces. Numbers (e.g. 123) and special symbols (e.g. /-+#) are not allowed.")
     private String name;
 
     @NotBlank(message = "Category is required")

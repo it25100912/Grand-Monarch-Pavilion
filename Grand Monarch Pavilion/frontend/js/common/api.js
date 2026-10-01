@@ -359,8 +359,8 @@ const ApiService = {
                 body: JSON.stringify(resource)
             });
         },
-        update(resource) {
-            return ApiService.request('/resources', {
+        update(id, resource) {
+            return ApiService.request(`/resources/${id}`, {
                 method: 'PUT',
                 body: JSON.stringify(resource)
             });
