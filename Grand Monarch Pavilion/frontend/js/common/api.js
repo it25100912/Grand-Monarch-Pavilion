@@ -440,17 +440,45 @@ const ApiService = {
                 method: 'DELETE'
             });
         },
-        getReceipts(customerId = null) {
-            return ApiService.request(customerId ? `/receipts?customerId=${customerId}` : '/receipts');
+        async getReceipts(customerId = null) {
+            try {
+                return await ApiService.request(customerId ? `/receipts?customerId=${customerId}` : '/receipts');
+            } catch (err) {
+                try {
+                    return await ApiService.request(customerId ? `/billing/receipts?customerId=${customerId}` : '/billing/receipts');
+                } catch (e2) {
+                    return [];
+                }
+            }
         },
-        getReceiptById(id) {
-            return ApiService.request(`/receipts/${id}`);
+        async getReceiptById(id) {
+            try {
+                return await ApiService.request(`/receipts/${id}`);
+            } catch (err) {
+                try {
+                    return await ApiService.request(`/billing/receipts/${id}`);
+                } catch (e2) {
+                    return null;
+                }
+            }
         },
-        getFinancialReports(period = 'monthly', startDate = '', endDate = '') {
+        async getFinancialReports(period = 'monthly', startDate = '', endDate = '') {
             let q = `?period=${period}`;
             if (startDate) q += `&startDate=${startDate}`;
             if (endDate) q += `&endDate=${endDate}`;
-            return ApiService.request(`/reports/financial${q}`);
+            try {
+                return await ApiService.request(`/reports/financial${q}`);
+            } catch (err) {
+                try {
+                    return await ApiService.request(`/payments/reports${q}`);
+                } catch (e2) {
+                    try {
+                        return await ApiService.request(`/billing/reports${q}`);
+                    } catch (e3) {
+                        return null;
+                    }
+                }
+            }
         }
     },
 

@@ -192,20 +192,52 @@ INSERT INTO `invoices` (`id`, `invoice_number`, `customer_id`, `booking_type`, `
 (10, 'INV-2026-0010', 13, 'RESERVATION', 11, 28500.00, 2850.00, 850.00, 30500.00, 'PAID', NOW());
 
 -- --------------------------------------------------------------------
--- 12. PAYMENTS & TRANSACTION RECEIPTS (10 Transactions)
+-- 12. PAYMENTS & TRANSACTION SETTLEMENTS (10 Transactions)
 -- --------------------------------------------------------------------
 DELETE FROM `payments` WHERE `id` >= 1;
 INSERT INTO `payments` (`id`, `invoice_id`, `payment_method`, `amount_paid`, `deposit_amount`, `balance_amount`, `booking_ref`, `customer_name`, `transaction_ref`, `status`, `verified_by`, `verified_at`, `slip_file_name`, `payment_date`) VALUES
-(1, 1, 'BANK_TRANSFER', 500000.00, 500000.00, 1500000.00, 'EVT-2026-001', 'Sandaruwan D.G.I.', 'TXN-BOC-20261001-01', 'VERIFIED', 'Wijesingha (Finance)', NOW(), 'slips/boc_receipt_001.pdf', NOW()),
-(2, 2, 'ONLINE_PAYMENT', 400000.00, 400000.00, 900000.00, 'EVT-2026-002', 'Vihanga Nethpahan', 'TXN-COMM-20261002-02', 'VERIFIED', 'Wijesingha (Finance)', NOW(), 'slips/comm_slip_002.pdf', NOW()),
-(3, 3, 'CREDIT_CARD', 250000.00, 250000.00, 450000.00, 'EVT-2026-003', 'Kamal Perera', 'TXN-VISA-20261003-03', 'VERIFIED', 'Wijesingha (Finance)', NOW(), '', NOW()),
-(4, 4, 'BANK_TRANSFER', 300000.00, 300000.00, 500000.00, 'EVT-2026-004', 'Kavindu Perera', 'TXN-HNB-20261004-04', 'VERIFIED', 'Wijesingha (Finance)', NOW(), 'slips/hnb_transfer_004.pdf', NOW()),
+(1, 1, 'BANK_TRANSFER', 500000.00, 500000.00, 1500000.00, 'EVT-2026-001', 'Sandaruwan D.G.I.', 'TXN-BOC-20261001-01', 'PARTIALLY_PAID', 'Wijesingha (Finance)', NOW(), 'slips/boc_receipt_001.pdf', NOW()),
+(2, 2, 'ONLINE_PAYMENT', 400000.00, 400000.00, 900000.00, 'EVT-2026-002', 'Vihanga Nethpahan', 'TXN-COMM-20261002-02', 'PARTIALLY_PAID', 'Wijesingha (Finance)', NOW(), 'slips/comm_slip_002.pdf', NOW()),
+(3, 3, 'CREDIT_CARD', 250000.00, 250000.00, 450000.00, 'EVT-2026-003', 'Kamal Perera', 'TXN-VISA-20261003-03', 'PARTIALLY_PAID', 'Wijesingha (Finance)', NOW(), '', NOW()),
+(4, 4, 'BANK_TRANSFER', 300000.00, 300000.00, 500000.00, 'EVT-2026-004', 'Kavindu Perera', 'TXN-HNB-20261004-04', 'PARTIALLY_PAID', 'Wijesingha (Finance)', NOW(), 'slips/hnb_transfer_004.pdf', NOW()),
 (5, 5, 'BANK_TRANSFER', 450000.00, 450000.00, 1000000.00, 'EVT-2026-005', 'Dinuka Fernando', 'TXN-SAMP-20261005-05', 'PENDING_VERIFICATION', NULL, NULL, 'slips/sampath_slip_005.pdf', NOW()),
-(6, 6, 'ONLINE_PAYMENT', 380000.00, 380000.00, 0.00, 'EVT-2026-006', 'Naveen Jayawardena', 'TXN-MAST-20261005-06', 'VERIFIED', 'Wijesingha (Finance)', NOW(), '', NOW()),
-(7, 7, 'CASH', 200000.00, 200000.00, 420000.00, 'EVT-2026-007', 'Leon Kudaligama', 'TXN-CSH-20261006-07', 'VERIFIED', 'Wijesingha (Finance)', NOW(), '', NOW()),
-(8, 8, 'CREDIT_CARD', 20000.00, 20000.00, 0.00, 'RES-2026-001', 'Sandaruwan D.G.I.', 'TXN-POS-20261007-08', 'VERIFIED', 'Wijesingha (Finance)', NOW(), '', NOW()),
-(9, 9, 'CREDIT_CARD', 34000.00, 34000.00, 0.00, 'RES-2026-002', 'Vihanga Nethpahan', 'TXN-POS-20261007-09', 'VERIFIED', 'Wijesingha (Finance)', NOW(), '', NOW()),
-(10, 10, 'CASH', 30500.00, 30500.00, 0.00, 'RES-2026-011', 'Kavindu Perera', 'TXN-CSH-20261006-10', 'VERIFIED', 'Wijesingha (Finance)', NOW(), '', NOW());
+(6, 6, 'ONLINE_PAYMENT', 380000.00, 380000.00, 0.00, 'EVT-2026-006', 'Naveen Jayawardena', 'TXN-MAST-20261005-06', 'PAID', 'Wijesingha (Finance)', NOW(), '', NOW()),
+(7, 7, 'CASH', 200000.00, 200000.00, 420000.00, 'EVT-2026-007', 'Leon Kudaligama', 'TXN-CSH-20261006-07', 'PARTIALLY_PAID', 'Wijesingha (Finance)', NOW(), '', NOW()),
+(8, 8, 'CREDIT_CARD', 20000.00, 20000.00, 0.00, 'RES-2026-001', 'Sandaruwan D.G.I.', 'TXN-POS-20261007-08', 'PAID', 'Wijesingha (Finance)', NOW(), '', NOW()),
+(9, 9, 'CREDIT_CARD', 34000.00, 34000.00, 0.00, 'RES-2026-002', 'Vihanga Nethpahan', 'TXN-POS-20261007-09', 'PAID', 'Wijesingha (Finance)', NOW(), '', NOW()),
+(10, 10, 'CASH', 30500.00, 30500.00, 0.00, 'RES-2026-011', 'Kavindu Perera', 'TXN-CSH-20261006-10', 'PAID', 'Wijesingha (Finance)', NOW(), '', NOW());
+
+-- --------------------------------------------------------------------
+-- 12b. OFFICIAL RECEIPTS & CLEARANCE HISTORY (10 Digital Receipts)
+-- --------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `receipts` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `receipt_number` VARCHAR(50) NOT NULL UNIQUE,
+  `payment_id` INT NOT NULL,
+  `invoice_id` INT NOT NULL,
+  `customer_id` INT NOT NULL,
+  `amount` DECIMAL(10,2) NOT NULL,
+  `payment_method` VARCHAR(50) NOT NULL,
+  `receipt_date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `notes` TEXT,
+  FOREIGN KEY (`payment_id`) REFERENCES `payments`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`invoice_id`) REFERENCES `invoices`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`customer_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DELETE FROM `receipts` WHERE `id` >= 1;
+INSERT INTO `receipts` (`id`, `receipt_number`, `payment_id`, `invoice_id`, `customer_id`, `amount`, `payment_method`, `receipt_date`, `notes`) VALUES
+(1, 'REC-2026-0001', 1, 1, 6, 500000.00, 'BANK_TRANSFER', '2026-10-01 10:30:00', 'Official advance payment receipt for Sandaruwan Wedding (EVT-2026-001)'),
+(2, 'REC-2026-0002', 2, 2, 12, 400000.00, 'ONLINE_PAYMENT', '2026-10-02 11:15:00', 'Official registration payment receipt for Virtusa Summit (EVT-2026-002)'),
+(3, 'REC-2026-0003', 3, 3, 7, 250000.00, 'CREDIT_CARD', '2026-10-03 14:20:00', 'Birthday gala reservation deposit receipt (EVT-2026-003)'),
+(4, 'REC-2026-0004', 4, 4, 13, 300000.00, 'BANK_TRANSFER', '2026-10-04 16:45:00', 'FinTech networking night booking receipt (EVT-2026-004)'),
+(5, 'REC-2026-0005', 5, 5, 14, 450000.00, 'BANK_TRANSFER', '2026-10-05 09:50:00', 'Traditional Poruwa wedding deposit voucher (EVT-2026-005)'),
+(6, 'REC-2026-0006', 6, 6, 15, 380000.00, 'ONLINE_PAYMENT', '2026-10-05 13:00:00', 'Full settlement receipt for Investor Conference (EVT-2026-006)'),
+(7, 'REC-2026-0007', 7, 7, 16, 200000.00, 'CASH', '2026-10-06 15:30:00', 'Garden engagement party cash receipt (EVT-2026-007)'),
+(8, 'REC-2026-0008', 8, 8, 6, 20000.00, 'CREDIT_CARD', '2026-10-07 13:30:00', 'Dining Table T-01 clearance receipt (RES-2026-001)'),
+(9, 'REC-2026-0009', 9, 9, 12, 34000.00, 'CREDIT_CARD', '2026-10-07 14:15:00', 'Dining Table T-03 luncheon receipt (RES-2026-002)'),
+(10, 'REC-2026-0010', 10, 10, 13, 30500.00, 'CASH', '2026-10-06 21:00:00', 'Dining Table G-01 dinner bill settlement (RES-2026-011)');
+
 
 -- --------------------------------------------------------------------
 -- 13. STAFF TASKS & DUTY ROSTERS (10 Operational Tasks)
