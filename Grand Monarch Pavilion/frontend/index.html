@@ -2994,7 +2994,7 @@
                     <div style="font-size:0.75rem; text-transform:uppercase; font-weight:800; color:#b0b8b4; letter-spacing:0.5px; margin-bottom:10px;"><i class="fa-solid fa-user"></i> Customer Details</div>
                     <div class="form-group" style="margin-bottom:0;">
                         <label>Select Customer <span style="color:#ef4444;">*</span></label>
-                        <select id="newResCustomerId" class="form-control"></select>
+                        <select id="newResCustomerId" class="form-control" onchange="ReservationsComponent.onCustomerSelect(this.value)"></select>
                     </div>
                 </div>
 
@@ -3012,7 +3012,7 @@
                         </div>
                         <div class="form-group" style="margin-bottom:0;">
                             <label>Time <span style="color:#ef4444;">*</span></label>
-                            <input type="time" id="newResTime" class="form-control" required>
+                            <input type="time" id="newResTime" class="form-control" required onchange="ReservationsComponent.checkRealtimeTableAvailability('newRes')">
                         </div>
                     </div>
                 </div>

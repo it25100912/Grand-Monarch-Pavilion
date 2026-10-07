@@ -671,7 +671,36 @@ const ReservationsComponent = {
             this.populateCustomerDropdown();
         }
 
+        const timeEl = document.getElementById('newResTime');
+        if (timeEl) {
+            timeEl.value = this.getSuggestedTime();
+        }
+
         ModalManager.openModal('newReservationModal');
+    },
+
+    getSuggestedTime(customerId = null) {
+        if (customerId && this.reservations && this.reservations.length > 0) {
+            const custRes = this.reservations.find(r => String(r.customerId) === String(customerId));
+            if (custRes && custRes.reservationTime) {
+                return custRes.reservationTime.slice(0, 5);
+            }
+        }
+        const now = new Date();
+        const addHours = now.getMinutes() >= 30 ? 2 : 1;
+        const d = new Date();
+        d.setHours(d.getHours() + addHours, 0, 0, 0);
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mm = String(d.getMinutes()).padStart(2, '0');
+        return `${hh}:${mm}`;
+    },
+
+    onCustomerSelect(customerId) {
+        const timeEl = document.getElementById('newResTime');
+        if (timeEl) {
+            timeEl.value = this.getSuggestedTime(customerId);
+        }
+        this.checkRealtimeTableAvailability('newRes');
     },
 
     async handleNewReservationSubmit(e) {
