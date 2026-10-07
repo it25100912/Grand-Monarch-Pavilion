@@ -648,7 +648,7 @@ const ReservationsComponent = {
     // ============================================================
     // NEW RESERVATION MODAL (Staff)
     // ============================================================
-    openNewReservationModal() {
+    async openNewReservationModal() {
         const form = document.getElementById('formNewReservation');
         if (form) form.reset();
 
@@ -659,8 +659,18 @@ const ReservationsComponent = {
             dateEl.value = today;
         }
 
-        this.populateTableDropdowns();
-        this.populateCustomerDropdown();
+        if (!this.tables || this.tables.length === 0) {
+            await this.loadTables();
+        } else {
+            this.populateTableDropdowns();
+        }
+
+        if (!this.customers || this.customers.length === 0) {
+            await this.loadCustomers();
+        } else {
+            this.populateCustomerDropdown();
+        }
+
         ModalManager.openModal('newReservationModal');
     },
 

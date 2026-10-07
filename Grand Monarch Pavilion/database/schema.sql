@@ -213,3 +213,24 @@ INSERT INTO `users` (`id`, `username`, `password`, `full_name`, `email`, `phone`
 (6, 'sandaruwan', 'admin123', 'Sandaruwan D.G.I.', 'sandaruwan@gmail.com', '0719876543', 'CUSTOMER', 'ACTIVE'),
 (7, 'kamal', 'admin123', 'Kamal Perera', 'kamal@gmail.com', '0711122334', 'CUSTOMER', 'ACTIVE');
 
+-- ====================================================================
+-- RESTAURANT DINING TABLES (Default Tables)
+-- ====================================================================
+INSERT INTO `restaurant_tables` (`table_number`, `capacity`, `location`, `status`) VALUES
+('T-01', 2, 'Main Dining Indoor Hall', 'AVAILABLE'),
+('T-02', 2, 'Main Dining Indoor Hall', 'AVAILABLE'),
+('T-03', 4, 'Main Dining Indoor Hall', 'AVAILABLE'),
+('T-04', 4, 'Main Dining Indoor Hall', 'AVAILABLE'),
+('T-05', 6, 'Main Dining Indoor Hall', 'AVAILABLE'),
+('T-06', 8, 'Main Dining Indoor Hall', 'AVAILABLE'),
+('G-01', 4, 'Outdoor Garden Terrace', 'AVAILABLE'),
+('G-02', 4, 'Outdoor Garden Terrace', 'AVAILABLE'),
+('G-03', 6, 'Outdoor Garden Terrace', 'AVAILABLE'),
+('R-01', 2, 'Rooftop Panoramic Deck', 'AVAILABLE'),
+('R-02', 4, 'Rooftop Panoramic Deck', 'AVAILABLE'),
+('VIP-01', 10, 'VIP Private Lounge', 'AVAILABLE'),
+('VIP-02', 12, 'VIP Private Lounge', 'AVAILABLE'),
+('P-01', 4, 'Poolside Deck', 'AVAILABLE'),
+('P-02', 6, 'Poolside Deck', 'AVAILABLE');
+
+

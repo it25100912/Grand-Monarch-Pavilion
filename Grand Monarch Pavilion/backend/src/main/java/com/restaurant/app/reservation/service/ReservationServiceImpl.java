@@ -12,6 +12,7 @@ import com.restaurant.app.reservation.entity.Restaurant;
 import com.restaurant.app.reservation.entity.RestaurantTable;
 import com.restaurant.app.reservation.repository.ReservationRepository;
 import com.restaurant.app.reservation.repository.TableRepository;
+import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +38,30 @@ public class ReservationServiceImpl implements ReservationService {
         this.reservationRepository = reservationRepository;
         this.tableRepository = tableRepository;
         this.userRepository = userRepository;
+    }
+
+    @PostConstruct
+    public void seedTablesIfEmpty() {
+        if (tableRepository.count() == 0) {
+            List<RestaurantTable> initialTables = List.of(
+                new RestaurantTable(null, "T-01", 2, "Main Dining Indoor Hall", "AVAILABLE"),
+                new RestaurantTable(null, "T-02", 2, "Main Dining Indoor Hall", "AVAILABLE"),
+                new RestaurantTable(null, "T-03", 4, "Main Dining Indoor Hall", "AVAILABLE"),
+                new RestaurantTable(null, "T-04", 4, "Main Dining Indoor Hall", "AVAILABLE"),
+                new RestaurantTable(null, "T-05", 6, "Main Dining Indoor Hall", "AVAILABLE"),
+                new RestaurantTable(null, "T-06", 8, "Main Dining Indoor Hall", "AVAILABLE"),
+                new RestaurantTable(null, "G-01", 4, "Outdoor Garden Terrace", "AVAILABLE"),
+                new RestaurantTable(null, "G-02", 4, "Outdoor Garden Terrace", "AVAILABLE"),
+                new RestaurantTable(null, "G-03", 6, "Outdoor Garden Terrace", "AVAILABLE"),
+                new RestaurantTable(null, "R-01", 2, "Rooftop Panoramic Deck", "AVAILABLE"),
+                new RestaurantTable(null, "R-02", 4, "Rooftop Panoramic Deck", "AVAILABLE"),
+                new RestaurantTable(null, "VIP-01", 10, "VIP Private Lounge", "AVAILABLE"),
+                new RestaurantTable(null, "VIP-02", 12, "VIP Private Lounge", "AVAILABLE"),
+                new RestaurantTable(null, "P-01", 4, "Poolside Deck", "AVAILABLE"),
+                new RestaurantTable(null, "P-02", 6, "Poolside Deck", "AVAILABLE")
+            );
+            tableRepository.saveAll(initialTables);
+        }
     }
 
     @Override
