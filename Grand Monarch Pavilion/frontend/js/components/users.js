@@ -170,12 +170,14 @@ const UsersComponent = {
                         <button class="action-btn" style="background:rgba(212, 175, 55, 0.15); color:#d4af37; border:1px solid rgba(212, 175, 55, 0.3); padding:3px 6px; font-size:0.68rem;" onclick="UsersComponent.openEditUserModal(${s.id})" title="Edit Details">
                             <i class="fa-solid fa-pen-to-square"></i>
                         </button>
+                        ${s.role === 'ADMIN' || s.username === 'admin' ? '' : `
                         <button class="action-btn" style="background:rgba(255, 255, 255, 0.06); color:${status === 'ACTIVE' ? '#fbbf24' : '#4ade80'}; border:1px solid rgba(255, 255, 255, 0.15); padding:3px 5px; font-size:0.68rem;" onclick="UsersComponent.toggleStatus(${s.id}, '${status === 'ACTIVE' ? 'ON_LEAVE' : 'ACTIVE'}')" title="${status === 'ACTIVE' ? 'Set On Leave' : 'Set Active'}">
                             <i class="fa-solid fa-power-off"></i>
                         </button>
                         <button class="action-btn" style="background:rgba(239, 68, 68, 0.15); color:#f87171; border:1px solid rgba(239, 68, 68, 0.3); padding:3px 5px; font-size:0.68rem;" onclick="UsersComponent.deleteUser(${s.id})" title="Delete Staff Account">
                             <i class="fa-solid fa-trash"></i>
                         </button>
+                        `}
                     </div>
                 </td>
             </tr>
@@ -763,6 +765,11 @@ const UsersComponent = {
     },
 
     async toggleStatus(id, newStatus) {
+        const target = this.staffList.find(s => s.id === id);
+        if (target && (target.role === 'ADMIN' || target.username === 'admin')) {
+            NotificationManager.showToast('Administrator status cannot be modified.', true);
+            return;
+        }
         try {
             const res = await ApiService.users.updateStatus(id, newStatus);
             if (res && (res.success || res.id)) {
@@ -777,6 +784,11 @@ const UsersComponent = {
     },
 
     async deleteUser(id) {
+        const target = this.staffList.find(s => s.id === id);
+        if (target && (target.role === 'ADMIN' || target.username === 'admin')) {
+            NotificationManager.showToast('Administrator account cannot be deleted.', true);
+            return;
+        }
         if (!confirm('Are you sure you want to delete this account?')) return;
         try {
             const res = await ApiService.users.delete(id);
