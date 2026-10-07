@@ -330,6 +330,15 @@ const AuthManager = {
         }
     },
 
+    hasRole(roles) {
+        if (!this.currentUser) return false;
+        const currentRole = (this.currentUser.role || '').toUpperCase();
+        if (Array.isArray(roles)) {
+            return roles.map(r => r.toUpperCase()).includes(currentRole);
+        }
+        return currentRole === (roles || '').toUpperCase();
+    },
+
     handleBookingAuthGuard(modalId) {
         if (!this.isLoggedIn) {
             ModalManager.openModal('loginModal');

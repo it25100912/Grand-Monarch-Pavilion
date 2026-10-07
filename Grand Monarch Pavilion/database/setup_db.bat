@@ -18,6 +18,11 @@ if not defined MYSQL_CMD (
         set "MYSQL_CMD=C:\Program Files\MySQL\MySQL Workbench 8.0\mysql.exe"
     )
 )
+if not defined MYSQL_CMD (
+    if exist "C:\xampp\mysql\bin\mysql.exe" (
+        set "MYSQL_CMD=C:\xampp\mysql\bin\mysql.exe"
+    )
+)
 
 if not defined MYSQL_CMD (
     echo [ERROR] mysql.exe not found in PATH or standard MySQL directories.

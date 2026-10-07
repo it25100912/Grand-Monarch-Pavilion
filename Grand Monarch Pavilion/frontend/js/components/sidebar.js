@@ -73,8 +73,12 @@ const NavigationManager = {
         } else if (sectionId === 'resources' && window.ResourcesComponent) {
             window.ResourcesComponent.load();
         } else if (['payments', 'invoices', 'receipts'].includes(sectionId) && window.BillingComponent) {
+            if (sectionId === 'invoices') window.BillingComponent.renderInvoicesTable();
+            if (sectionId === 'receipts') window.BillingComponent.renderReceiptsTable();
+            if (sectionId === 'payments') window.BillingComponent.renderPaymentsTable();
             window.BillingComponent.load();
         } else if (sectionId === 'reports' && window.BillingComponent) {
+            window.BillingComponent.renderReportView();
             window.BillingComponent.load();
             if (window.BillingComponent.loadReports) window.BillingComponent.loadReports();
         } else if (sectionId === 'menu' && window.MenuComponent) {
