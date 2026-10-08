@@ -11,6 +11,9 @@ import com.restaurant.app.payment.repository.InvoiceRepository;
 import com.restaurant.app.payment.repository.PaymentRepository;
 import com.restaurant.app.event.repository.EventRepository;
 import com.restaurant.app.reservation.repository.ReservationRepository;
+import com.restaurant.app.common.observer.BookingSubject;
+import com.restaurant.app.payment.strategy.PaymentStrategy;
+import com.restaurant.app.payment.strategy.PaymentStrategyFactory;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,17 +31,23 @@ public class PaymentServiceImpl implements PaymentService {
     private final UserRepository userRepository;
     private final ReservationRepository reservationRepository;
     private final EventRepository eventRepository;
+    private final PaymentStrategyFactory paymentStrategyFactory;
+    private final BookingSubject bookingSubject;
 
     public PaymentServiceImpl(InvoiceRepository invoiceRepository,
                               PaymentRepository paymentRepository,
                               UserRepository userRepository,
                               ReservationRepository reservationRepository,
-                              EventRepository eventRepository) {
+                              EventRepository eventRepository,
+                              PaymentStrategyFactory paymentStrategyFactory,
+                              BookingSubject bookingSubject) {
         this.invoiceRepository = invoiceRepository;
         this.paymentRepository = paymentRepository;
         this.userRepository = userRepository;
         this.reservationRepository = reservationRepository;
         this.eventRepository = eventRepository;
+        this.paymentStrategyFactory = paymentStrategyFactory;
+        this.bookingSubject = bookingSubject;
     }
 
     @PostConstruct
@@ -169,23 +178,32 @@ public class PaymentServiceImpl implements PaymentService {
                 ? request.getCustomerName()
                 : invoice.getCustomerName());
 
-        payment.setPaymentMethod(request.getPaymentMethod() != null ? request.getPaymentMethod().toUpperCase() : "CASH");
+        // SE2030 Design Pattern #2: Strategy Pattern
+        // Select and execute interchangeable payment algorithm at runtime
+        PaymentStrategy paymentStrategy = paymentStrategyFactory.getStrategy(request.getPaymentMethod());
+        paymentStrategy.process(payment, request, invoice);
+
         payment.setAmountPaid(request.getAmountPaid() != null ? request.getAmountPaid() : (invoice != null ? invoice.getTotalAmount() : 0.0));
         payment.setDepositAmount(request.getDepositAmount() != null ? request.getDepositAmount() : payment.getAmountPaid());
         payment.setBalanceAmount(request.getBalanceAmount() != null ? request.getBalanceAmount() : 0.0);
 
-        payment.setTransactionRef(request.getTransactionRef() != null && !request.getTransactionRef().isBlank()
-                ? request.getTransactionRef()
-                : "TXN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+        if (request.getTransactionRef() != null && !request.getTransactionRef().isBlank()) {
+            payment.setTransactionRef(request.getTransactionRef());
+        }
 
-        String status = request.getStatus() != null ? request.getStatus().toUpperCase() : "PAID";
+        String status = (request.getStatus() != null && !request.getStatus().isBlank())
+                ? request.getStatus().toUpperCase()
+                : payment.getStatus();
+
         if (payment.getBalanceAmount() > 0 && !"REFUNDED".equals(status) && !"PENDING".equals(status) && !"FAILED".equals(status) && !"PENDING_VERIFICATION".equals(status) && !"REJECTED".equals(status)) {
             status = "PARTIALLY_PAID";
         }
         payment.setStatus(status);
         payment.setRefundReason(request.getRefundReason());
-        payment.setSlipUrl(request.getSlipUrl());
-        payment.setSlipFileName(request.getSlipFileName());
+        if (request.getSlipUrl() != null && !request.getSlipUrl().isBlank()) {
+            payment.setSlipUrl(request.getSlipUrl());
+            payment.setSlipFileName(request.getSlipFileName());
+        }
         payment.setRejectionReason(request.getRejectionReason());
         payment.setVerifiedBy(request.getVerifiedBy());
         if ("PAID".equals(status) && request.getVerifiedBy() != null) {
@@ -199,6 +217,17 @@ public class PaymentServiceImpl implements PaymentService {
             invoice.setStatus(status.equals("PAID") ? "PAID" : (status.equals("PARTIALLY_PAID") ? "PARTIALLY_PAID" : "UNPAID"));
             invoiceRepository.save(invoice);
         }
+
+        // SE2030 Design Pattern #3: Observer Pattern
+        // Broadcast payment processed event to registered observers
+        String customerEmail = (invoice != null && invoice.getCustomer() != null) ? invoice.getCustomer().getEmail() : null;
+        bookingSubject.notifyObservers(
+                saved.getBookingRef(),
+                "PAYMENT_" + saved.getPaymentMethod(),
+                saved.getStatus(),
+                customerEmail,
+                "Payment of LKR " + saved.getAmountPaid() + " recorded via " + saved.getPaymentMethod() + " (" + saved.getStatus() + ")"
+        );
 
         return new PaymentResponse(saved);
     }
@@ -231,6 +260,18 @@ public class PaymentServiceImpl implements PaymentService {
         confirmLinkedBooking(payment.getBookingRef());
 
         Payment updated = paymentRepository.save(payment);
+
+        // Notify observers of payment approval
+        String customerEmail = (updated.getInvoice() != null && updated.getInvoice().getCustomer() != null)
+                ? updated.getInvoice().getCustomer().getEmail() : null;
+        bookingSubject.notifyObservers(
+                updated.getBookingRef(),
+                "PAYMENT_APPROVAL",
+                updated.getStatus(),
+                customerEmail,
+                "Payment #" + updated.getId() + " was approved by " + updated.getVerifiedBy()
+        );
+
         return new PaymentResponse(updated);
     }
 
@@ -251,6 +292,18 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         Payment updated = paymentRepository.save(payment);
+
+        // Notify observers of payment rejection
+        String customerEmail = (updated.getInvoice() != null && updated.getInvoice().getCustomer() != null)
+                ? updated.getInvoice().getCustomer().getEmail() : null;
+        bookingSubject.notifyObservers(
+                updated.getBookingRef(),
+                "PAYMENT_REJECTION",
+                "REJECTED",
+                customerEmail,
+                "Payment #" + updated.getId() + " was rejected. Reason: " + updated.getRejectionReason()
+        );
+
         return new PaymentResponse(updated);
     }
 
