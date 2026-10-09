@@ -119,7 +119,7 @@ const VenuesComponent = {
         const capacity = capEl?.value;
         const pricePerHour = priceEl?.value;
 
-        const nVal = FormValidator.validateText(name, 'Venue Pavilion Name', 3);
+        const nVal = FormValidator.validateEntityName(name, 'Venue Pavilion Name', 3);
         if (!nVal.valid) return FormValidator.markInvalid(nameEl, nVal.message);
 
         const cVal = FormValidator.validateNumber(capacity, 'Guest Capacity', 1, 5000, true);
@@ -190,7 +190,7 @@ const VenuesComponent = {
             return;
         }
 
-        const nVal = FormValidator.validateText(name, 'Venue Pavilion Name', 3);
+        const nVal = FormValidator.validateEntityName(name, 'Venue Pavilion Name', 3);
         if (!nVal.valid) return FormValidator.markInvalid(nameEl, nVal.message);
 
         const cVal = FormValidator.validateNumber(capacity, 'Guest Capacity', 1, 5000, true);

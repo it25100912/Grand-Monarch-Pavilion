@@ -675,9 +675,31 @@ const EventsComponent = {
             .map(cb => cb.value)
             .join(', ');
 
-        if (!name || name.length < 3) {
-            if (window.NotificationManager) NotificationManager.showToast('Please provide a valid venue name (min 3 chars)', 'warning');
-            return;
+        const nameEl = document.getElementById('modalVenueName');
+        const locEl = document.getElementById('modalVenueLocation');
+        const capEl = document.getElementById('modalVenueCapacity');
+        const priceEl = document.getElementById('modalVenuePrice');
+
+        if (window.FormValidator) {
+            const nVal = FormValidator.validateEntityName(name, 'Venue Name', 3, 100);
+            if (!nVal.valid) return FormValidator.markInvalid(nameEl, nVal.message);
+
+            if (location) {
+                const lVal = FormValidator.validateEntityName(location, 'Location / Wing', 2, 150);
+                if (!lVal.valid) return FormValidator.markInvalid(locEl, lVal.message);
+            }
+
+            const cVal = FormValidator.validateNumber(capacity, 'Guest Capacity', 1, 10000, true);
+            if (!cVal.valid) return FormValidator.markInvalid(capEl, cVal.message);
+
+            const pVal = FormValidator.validateNumber(pricePerHour, 'Hourly Rate (LKR)', 0);
+            if (!pVal.valid) return FormValidator.markInvalid(priceEl, pVal.message);
+        } else {
+            if (!name || name.length < 3 || /^\d+$/.test(name) || !/[a-zA-Z]/.test(name)) {
+                if (window.NotificationManager) NotificationManager.showToast('Venue name cannot be numbers only (e.g. 123). Please include letters.', 'warning');
+                if (nameEl) nameEl.focus();
+                return;
+            }
         }
 
         const payload = {

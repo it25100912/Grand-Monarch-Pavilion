@@ -6,6 +6,7 @@ public class VenueRequest {
 
     @NotBlank(message = "Venue name is required")
     @Size(min = 3, max = 100, message = "Venue name must be between 3 and 100 characters")
+    @Pattern(regexp = "^(?=.*[a-zA-Z]).+$", message = "Venue name cannot be numbers only and must contain letters")
     private String name;
 
     @Size(max = 150, message = "Location must not exceed 150 characters")

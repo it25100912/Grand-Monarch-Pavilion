@@ -329,8 +329,8 @@ const FormValidator = {
             });
         });
 
-        // 3. Entity Name fields (dish names, category names): warn if purely numeric
-        const entityNameSelectors = '#modalMenuItemName, #modalCategoryName, #vName, #pkgName';
+        // 3. Entity Name fields (dish names, category names, venue names): warn if purely numeric
+        const entityNameSelectors = '#modalMenuItemName, #modalCategoryName, #vName, #pkgName, #modalVenueName, #editVenName';
         document.querySelectorAll(entityNameSelectors).forEach(input => {
             input.addEventListener('input', (e) => {
                 const val = e.target.value.trim();
