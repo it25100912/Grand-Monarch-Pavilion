@@ -103,4 +103,15 @@ public class Invoice {
     public void setCustomerName(String customerName) {
         this.customerName = customerName;
     }
+
+    @Transient
+    public Double getDiscount() {
+        return this.discountAmount;
+    }
+
+    public void setDiscount(Double discount) {
+        if (discount != null) {
+            this.discountAmount = discount;
+        }
+    }
 }

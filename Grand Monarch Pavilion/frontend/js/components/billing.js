@@ -451,7 +451,8 @@ const BillingComponent = {
                 bookingId,
                 subtotal,
                 taxAmount,
-                discount
+                discount,
+                discountAmount: discount
             });
 
             if (res && res.success) {

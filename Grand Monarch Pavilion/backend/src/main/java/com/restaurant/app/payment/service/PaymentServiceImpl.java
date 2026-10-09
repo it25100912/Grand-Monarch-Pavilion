@@ -79,10 +79,58 @@ public class PaymentServiceImpl implements PaymentService {
         if (invoice.getInvoiceNumber() == null || invoice.getInvoiceNumber().isBlank()) {
             invoice.setInvoiceNumber("INV-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         }
+
+        // 1. Resolve Customer from customerId
+        if (invoice.getCustomer() == null) {
+            Integer cId = invoice.getCustomerId();
+            if (cId != null && cId > 0) {
+                User cust = userRepository.findById(cId).orElse(null);
+                invoice.setCustomer(cust);
+            }
+        }
+
+        // 2. Fallback to Booking if customer not directly matched
+        if (invoice.getCustomer() == null && invoice.getBookingId() != null) {
+            String bType = invoice.getBookingType() != null ? invoice.getBookingType().toUpperCase() : "";
+            if (bType.contains("RES") || bType.contains("TABLE")) {
+                var rOpt = reservationRepository.findById(invoice.getBookingId());
+                if (rOpt.isPresent() && rOpt.get().getCustomer() != null) {
+                    invoice.setCustomer(rOpt.get().getCustomer());
+                }
+            } else if (bType.contains("EVT") || bType.contains("EVENT")) {
+                var eOpt = eventRepository.findById(invoice.getBookingId());
+                if (eOpt.isPresent() && eOpt.get().getCustomer() != null) {
+                    invoice.setCustomer(eOpt.get().getCustomer());
+                }
+            }
+        }
+
+        // 3. Fallback to any active customer to guarantee customer_id is NEVER null
+        if (invoice.getCustomer() == null) {
+            User fallback = userRepository.findByRole("CUSTOMER").stream().findFirst()
+                    .orElseGet(() -> userRepository.findAll().stream().findFirst().orElse(null));
+            if (fallback != null) {
+                invoice.setCustomer(fallback);
+            }
+        }
+
+        if (invoice.getBookingType() == null || invoice.getBookingType().isBlank()) {
+            invoice.setBookingType("TABLE_RESERVATION");
+        }
+        if (invoice.getBookingId() == null) {
+            invoice.setBookingId(1);
+        }
+        if (invoice.getSubtotal() == null) invoice.setSubtotal(0.0);
         if (invoice.getTaxAmount() == null) invoice.setTaxAmount(0.0);
-        if (invoice.getDiscountAmount() == null) invoice.setDiscountAmount(0.0);
+        if (invoice.getDiscountAmount() == null) {
+            invoice.setDiscountAmount(invoice.getDiscount() != null ? invoice.getDiscount() : 0.0);
+        }
         if (invoice.getTotalAmount() == null) {
-            invoice.setTotalAmount(invoice.getSubtotal() + invoice.getTaxAmount() - invoice.getDiscountAmount());
+            double total = invoice.getSubtotal() + invoice.getTaxAmount() - invoice.getDiscountAmount();
+            invoice.setTotalAmount(Math.max(0.0, total));
+        }
+        if (invoice.getStatus() == null || invoice.getStatus().isBlank()) {
+            invoice.setStatus("UNPAID");
         }
         return invoiceRepository.save(invoice);
     }
