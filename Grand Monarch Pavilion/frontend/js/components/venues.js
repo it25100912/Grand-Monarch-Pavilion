@@ -119,8 +119,13 @@ const VenuesComponent = {
         const capacity = capEl?.value;
         const pricePerHour = priceEl?.value;
 
-        const nVal = FormValidator.validateEntityName(name, 'Venue Pavilion Name', 3);
+        const nVal = FormValidator.validateVenueName(name, 'Venue Pavilion Name', 3);
         if (!nVal.valid) return FormValidator.markInvalid(nameEl, nVal.message);
+
+        const duplicate = (this.venues || []).find(v => (v.name || '').trim().toLowerCase() === name.toLowerCase());
+        if (duplicate) {
+            return FormValidator.markInvalid(nameEl, `A venue named "${name}" already exists.`);
+        }
 
         const cVal = FormValidator.validateNumber(capacity, 'Guest Capacity', 1, 5000, true);
         if (!cVal.valid) return FormValidator.markInvalid(capEl, cVal.message);
@@ -190,8 +195,13 @@ const VenuesComponent = {
             return;
         }
 
-        const nVal = FormValidator.validateEntityName(name, 'Venue Pavilion Name', 3);
+        const nVal = FormValidator.validateVenueName(name, 'Venue Pavilion Name', 3);
         if (!nVal.valid) return FormValidator.markInvalid(nameEl, nVal.message);
+
+        const duplicate = (this.venues || []).find(v => String(v.id) !== String(id) && (v.name || '').trim().toLowerCase() === name.toLowerCase());
+        if (duplicate) {
+            return FormValidator.markInvalid(nameEl, `A venue named "${name}" already exists.`);
+        }
 
         const cVal = FormValidator.validateNumber(capacity, 'Guest Capacity', 1, 5000, true);
         if (!cVal.valid) return FormValidator.markInvalid(capEl, cVal.message);

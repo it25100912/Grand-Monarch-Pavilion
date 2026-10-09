@@ -71,7 +71,14 @@ public class VenueServiceImpl implements VenueService {
         Venue venue = venueRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Venue not found with id: " + id));
 
-        if (request.getName() != null) venue.setName(request.getName());
+        if (request.getName() != null) {
+            venueRepository.findByName(request.getName()).ifPresent(existing -> {
+                if (existing.getId() != id) {
+                    throw new BadRequestException("A venue with this name already exists: " + request.getName());
+                }
+            });
+            venue.setName(request.getName());
+        }
         if (request.getLocation() != null) venue.setLocation(request.getLocation());
         if (request.getDescription() != null) venue.setDescription(request.getDescription());
         if (request.getImageUrl() != null) venue.setImageUrl(request.getImageUrl());

@@ -170,6 +170,27 @@ const FormValidator = {
         return { valid: true, value: cleaned };
     },
 
+    // Strict Venue Name Validation: Letters and spaces only. Strictly NO numbers (123) and NO symbols (-, =, + etc.)
+    validateVenueName(value, fieldName = 'Venue Name', minLength = 3, maxLength = 100) {
+        if (!value || typeof value !== 'string') {
+            return { valid: false, message: `${fieldName} is required.` };
+        }
+        const cleaned = value.trim();
+        if (cleaned.length < minLength) {
+            return { valid: false, message: `${fieldName} must be at least ${minLength} characters.` };
+        }
+        if (cleaned.length > maxLength) {
+            return { valid: false, message: `${fieldName} cannot exceed ${maxLength} characters.` };
+        }
+        if (/\d/.test(cleaned)) {
+            return { valid: false, message: `${fieldName} cannot contain numbers (e.g. 123). Please enter letters only.` };
+        }
+        if (!/^[a-zA-Z\s]+$/.test(cleaned)) {
+            return { valid: false, message: `${fieldName} can only contain letters and spaces. Numbers and symbols (such as -, =, +) are not allowed.` };
+        }
+        return { valid: true, value: cleaned };
+    },
+
     // Text length and required validation
     validateText(value, fieldName = 'Field', minLength = 2, maxLength = 255) {
         if (!value || typeof value !== 'string') {
@@ -329,7 +350,18 @@ const FormValidator = {
             });
         });
 
-        // 3. Entity Name fields (dish names, category names, venue names): warn if purely numeric
+        // 2b. Strict Venue Name fields: letters and spaces only - block digits and symbols (-, =, + etc.) in real-time
+        const venueNameInputs = '#modalVenueName, #editVenName, #vName';
+        document.querySelectorAll(venueNameInputs).forEach(input => {
+            input.addEventListener('input', (e) => {
+                if (/[^a-zA-Z\s]/.test(e.target.value)) {
+                    e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+                    if (window.NotificationManager) {
+                        NotificationManager.showToast('Venue Name can only contain letters and spaces. Numbers and symbols are not allowed.', true);
+                    }
+                }
+            });
+        });
         const entityNameSelectors = '#modalMenuItemName, #modalCategoryName, #vName, #pkgName, #modalVenueName, #editVenName';
         document.querySelectorAll(entityNameSelectors).forEach(input => {
             input.addEventListener('input', (e) => {

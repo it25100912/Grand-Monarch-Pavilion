@@ -3549,7 +3549,7 @@
                 <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:14px; margin-bottom:14px;">
                     <div class="form-group" style="margin:0;">
                         <label style="font-size:0.8rem; font-weight:700;">Venue Name <span class="text-danger">*</span></label>
-                        <input type="text" id="modalVenueName" class="form-control" placeholder="e.g. The Imperial Ballroom" required minlength="3" maxlength="100" pattern=".*[a-zA-Z]+.*" title="Venue name cannot be numbers only (e.g. 123). Please include letters.">
+                        <input type="text" id="modalVenueName" class="form-control" placeholder="e.g. The Imperial Ballroom" required minlength="3" maxlength="100" pattern="^[a-zA-Z\s]+$" title="Venue name can only contain letters and spaces. Numbers and symbols are not allowed.">
                     </div>
                     <div class="form-group" style="margin:0;">
                         <label style="font-size:0.8rem; font-weight:700;">Location / Wing <span class="text-danger">*</span></label>
@@ -3915,7 +3915,7 @@
                 <input type="hidden" id="editVenId">
                 <div class="form-group">
                     <label>Venue Name <span class="text-danger">*</span></label>
-                    <input type="text" id="editVenName" class="form-control" required minlength="3" maxlength="100" pattern=".*[a-zA-Z]+.*" title="Venue name cannot be numbers only (e.g. 123). Please include letters.">
+                    <input type="text" id="editVenName" class="form-control" required minlength="3" maxlength="100" pattern="^[a-zA-Z\s]+$" title="Venue name can only contain letters and spaces. Numbers and symbols are not allowed.">
                 </div>
                 <div class="form-group" style="display:flex; gap:12px;">
                     <div style="flex:1;">

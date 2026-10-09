@@ -681,7 +681,7 @@ const EventsComponent = {
         const priceEl = document.getElementById('modalVenuePrice');
 
         if (window.FormValidator) {
-            const nVal = FormValidator.validateEntityName(name, 'Venue Name', 3, 100);
+            const nVal = FormValidator.validateVenueName(name, 'Venue Name', 3, 100);
             if (!nVal.valid) return FormValidator.markInvalid(nameEl, nVal.message);
 
             if (location) {
@@ -695,11 +695,21 @@ const EventsComponent = {
             const pVal = FormValidator.validateNumber(pricePerHour, 'Hourly Rate (LKR)', 0);
             if (!pVal.valid) return FormValidator.markInvalid(priceEl, pVal.message);
         } else {
-            if (!name || name.length < 3 || /^\d+$/.test(name) || !/[a-zA-Z]/.test(name)) {
-                if (window.NotificationManager) NotificationManager.showToast('Venue name cannot be numbers only (e.g. 123). Please include letters.', 'warning');
+            if (!name || name.length < 3 || /[^a-zA-Z\s]/.test(name)) {
+                if (window.NotificationManager) NotificationManager.showToast('Venue name can only contain letters and spaces. Numbers and symbols are not allowed.', 'warning');
                 if (nameEl) nameEl.focus();
                 return;
             }
+        }
+
+        // Check for duplicate venue name against existing venues (excluding current editing venue)
+        const allVenues = this.venues || (window.VenuesComponent ? window.VenuesComponent.venues : []);
+        const duplicateVenue = allVenues.find(v => String(v.id) !== String(id) && (v.name || '').trim().toLowerCase() === name.toLowerCase());
+        if (duplicateVenue) {
+            const dupMsg = `A venue named "${name}" already exists. Please choose a unique name.`;
+            if (window.NotificationManager) NotificationManager.showToast(dupMsg, 'error');
+            if (nameEl && window.FormValidator) FormValidator.markInvalid(nameEl, dupMsg);
+            return;
         }
 
         const payload = {
