@@ -154,10 +154,8 @@ const ReservationsComponent = {
     },
 
     updateToolbar() {
-        const user = window.AuthManager ? AuthManager.currentUser : null;
-        const isStaff = user && ['ADMIN', 'EVENT_COORDINATOR', 'OPERATIONS_SUPERVISOR', 'STAFF', 'CUSTOMER_SERVICE'].includes(user.role);
         const toolbar = document.getElementById('resStaffToolbar');
-        if (toolbar) toolbar.style.display = isStaff ? 'flex' : 'none';
+        if (toolbar) toolbar.style.display = 'flex';
     },
 
     // ============================================================
@@ -601,22 +599,24 @@ const ReservationsComponent = {
                 <div style="background:#1b3b2b; border:1px solid rgba(212, 175, 55, 0.25); border-radius:12px; padding:14px;">
                     <div style="font-size:0.72rem; text-transform:uppercase; font-weight:800; color:#d1d5d0; letter-spacing:0.5px; margin-bottom:6px;"><i class="fa-solid fa-user"></i> Customer</div>
                     <div style="font-size:1rem; font-weight:800; color:#e6dfd5;">${Utils.escapeHtml(r.customerName || 'Customer #' + r.customerId)}</div>
-                    <div style="font-size:0.78rem; color:#b0b8b4; margin-top:4px;">ID: ${r.customerId}</div>
+                    <div style="font-size:0.78rem; color:#b0b8b4; margin-top:4px;">ID: ${r.customerId || '—'} ${r.customerPhone ? '| ' + Utils.escapeHtml(r.customerPhone) : ''}</div>
                 </div>
                 <div style="background:#1b3b2b; border:1px solid rgba(212, 175, 55, 0.25); border-radius:12px; padding:14px;">
-                    <div style="font-size:0.72rem; text-transform:uppercase; font-weight:800; color:#d1d5d0; letter-spacing:0.5px; margin-bottom:6px;"><i class="fa-solid fa-chair"></i> Dining Table</div>
+                    <div style="font-size:0.72rem; text-transform:uppercase; font-weight:800; color:#d1d5d0; letter-spacing:0.5px; margin-bottom:6px;"><i class="fa-solid fa-chair"></i> Room / Table</div>
                     <div style="font-size:1rem; font-weight:800; color:#e6dfd5;">${Utils.escapeHtml(r.tableNumber || 'Table #' + r.tableId)}</div>
                     <div style="font-size:0.78rem; color:#b0b8b4; margin-top:4px;">Table ID: ${r.tableId}</div>
                 </div>
                 <div style="background:#1b3b2b; border:1px solid rgba(212, 175, 55, 0.25); border-radius:12px; padding:14px;">
-                    <div style="font-size:0.72rem; text-transform:uppercase; font-weight:800; color:#d1d5d0; letter-spacing:0.5px; margin-bottom:6px;"><i class="fa-solid fa-calendar-day"></i> Date</div>
-                    <div style="font-size:1rem; font-weight:800; color:#e6dfd5;">${Utils.formatDate(r.reservationDate)}</div>
-                    <div style="font-size:0.78rem; color:#b0b8b4; margin-top:4px;">at ${(r.reservationTime || '').substring(0, 5)}</div>
+                    <div style="font-size:0.72rem; text-transform:uppercase; font-weight:800; color:#d1d5d0; letter-spacing:0.5px; margin-bottom:6px;"><i class="fa-solid fa-calendar-day"></i> Schedule &amp; Dates</div>
+                    <div style="font-size:0.95rem; font-weight:800; color:#e6dfd5;">In: ${Utils.formatDate(r.reservationDate)}</div>
+                    <div style="font-size:0.85rem; color:#b0b8b4; margin-top:2px;">Out: ${r.checkOutDate ? Utils.formatDate(r.checkOutDate) : 'Single Day'}</div>
                 </div>
                 <div style="background:#1b3b2b; border:1px solid rgba(212, 175, 55, 0.25); border-radius:12px; padding:14px;">
-                    <div style="font-size:0.72rem; text-transform:uppercase; font-weight:800; color:#d1d5d0; letter-spacing:0.5px; margin-bottom:6px;"><i class="fa-solid fa-users"></i> Party Size</div>
-                    <div style="font-size:1.4rem; font-weight:900; color:#e6dfd5;">${r.partySize || '—'}</div>
-                    <div style="font-size:0.78rem; color:#b0b8b4; margin-top:2px;">Dining Guests</div>
+                    <div style="font-size:0.72rem; text-transform:uppercase; font-weight:800; color:#d1d5d0; letter-spacing:0.5px; margin-bottom:6px;"><i class="fa-solid fa-users"></i> Guests &amp; Payment</div>
+                    <div style="font-size:1.1rem; font-weight:900; color:#e6dfd5;">${r.partySize || '—'} Guests</div>
+                    <div style="font-size:0.78rem; color:${(r.paymentStatus || '').toLowerCase() === 'paid' ? '#10b981' : '#f59e0b'}; margin-top:4px; font-weight:700;">
+                        Payment: ${Utils.escapeHtml(r.paymentStatus || 'Pending')}
+                    </div>
                 </div>
             </div>
 
@@ -646,18 +646,34 @@ const ReservationsComponent = {
     },
 
     // ============================================================
-    // NEW RESERVATION MODAL (Staff)
+    // NEW RESERVATION WORKFLOW (Administrative & Guest Booking)
     // ============================================================
     async openNewReservationModal() {
         const form = document.getElementById('formNewReservation');
         if (form) form.reset();
 
         const today = new Date().toISOString().split('T')[0];
-        const dateEl = document.getElementById('newResDate');
-        if (dateEl) {
-            dateEl.min = today;
-            dateEl.value = today;
+        const nextDayDate = new Date();
+        nextDayDate.setDate(nextDayDate.getDate() + 1);
+        const nextDay = nextDayDate.toISOString().split('T')[0];
+
+        const inDateEl = document.getElementById('newResCheckInDate');
+        if (inDateEl) {
+            inDateEl.min = today;
+            inDateEl.value = today;
         }
+
+        const outDateEl = document.getElementById('newResCheckOutDate');
+        if (outDateEl) {
+            outDateEl.min = nextDay;
+            outDateEl.value = nextDay;
+        }
+
+        const partyEl = document.getElementById('newResPartySize');
+        if (partyEl) partyEl.value = 2;
+
+        const payEl = document.getElementById('newResPaymentStatus');
+        if (payEl) payEl.value = 'Pending';
 
         if (!this.tables || this.tables.length === 0) {
             await this.loadTables();
@@ -671,36 +687,106 @@ const ReservationsComponent = {
             this.populateCustomerDropdown();
         }
 
-        const timeEl = document.getElementById('newResTime');
-        if (timeEl) {
-            timeEl.value = this.getSuggestedTime();
+        // Auto-fill logged-in customer info if customer is creating booking
+        const user = window.AuthManager ? AuthManager.currentUser : null;
+        if (user) {
+            const nameEl = document.getElementById('newResCustomerName');
+            const phoneEl = document.getElementById('newResCustomerPhone');
+            const emailEl = document.getElementById('newResCustomerEmail');
+            const custEl = document.getElementById('newResCustomerId');
+
+            if (user.role === 'CUSTOMER') {
+                if (nameEl) nameEl.value = user.fullName || user.username || '';
+                if (phoneEl) phoneEl.value = user.phone || '';
+                if (emailEl) emailEl.value = user.email || '';
+                if (custEl) custEl.value = user.id;
+            }
         }
 
+        this.checkRealtimeTableAvailability('newRes');
         ModalManager.openModal('newReservationModal');
     },
 
-    getSuggestedTime(customerId = null) {
-        if (customerId && this.reservations && this.reservations.length > 0) {
-            const custRes = this.reservations.find(r => String(r.customerId) === String(customerId));
-            if (custRes && custRes.reservationTime) {
-                return custRes.reservationTime.slice(0, 5);
-            }
-        }
-        const now = new Date();
-        const addHours = now.getMinutes() >= 30 ? 2 : 1;
-        const d = new Date();
-        d.setHours(d.getHours() + addHours, 0, 0, 0);
-        const hh = String(d.getHours()).padStart(2, '0');
-        const mm = String(d.getMinutes()).padStart(2, '0');
-        return `${hh}:${mm}`;
-    },
-
     onCustomerSelect(customerId) {
-        const timeEl = document.getElementById('newResTime');
-        if (timeEl) {
-            timeEl.value = this.getSuggestedTime(customerId);
+        if (!customerId) return;
+        const cust = (this.customers || []).find(c => String(c.id) === String(customerId));
+        if (cust) {
+            const nameEl = document.getElementById('newResCustomerName');
+            const phoneEl = document.getElementById('newResCustomerPhone');
+            const emailEl = document.getElementById('newResCustomerEmail');
+            if (nameEl) nameEl.value = cust.fullName || cust.username || '';
+            if (phoneEl) phoneEl.value = cust.phone || '';
+            if (emailEl) emailEl.value = cust.email || '';
         }
         this.checkRealtimeTableAvailability('newRes');
+    },
+
+    onCheckInDateChange() {
+        const inEl = document.getElementById('newResCheckInDate');
+        const outEl = document.getElementById('newResCheckOutDate');
+        if (!inEl || !inEl.value) return;
+
+        const inDate = new Date(inEl.value);
+        inDate.setDate(inDate.getDate() + 1);
+        const nextDay = inDate.toISOString().split('T')[0];
+
+        if (outEl) {
+            outEl.min = nextDay;
+            if (!outEl.value || outEl.value <= inEl.value) {
+                outEl.value = nextDay;
+            }
+        }
+        this.checkRealtimeTableAvailability('newRes');
+    },
+
+    checkRealtimeTableAvailability(prefix = 'newRes') {
+        const tableEl = document.getElementById(`${prefix}TableId`);
+        const inEl = document.getElementById(`${prefix}CheckInDate`) || document.getElementById(`${prefix}Date`);
+        const outEl = document.getElementById(`${prefix}CheckOutDate`);
+        const statusEl = document.getElementById(`${prefix}AvailabilityStatus`);
+        if (!statusEl) return;
+
+        const tableId = tableEl ? tableEl.value : null;
+        const checkIn = inEl ? inEl.value : null;
+        const checkOut = outEl && outEl.value ? outEl.value : checkIn;
+
+        if (!tableId || !checkIn) {
+            statusEl.innerHTML = '<i class="fa-solid fa-circle-info" style="color:var(--text-gold);"></i> Select a room/table and dates to verify live availability';
+            statusEl.style.color = '#b0b8b4';
+            statusEl.style.borderColor = 'rgba(212, 175, 55, 0.2)';
+            statusEl.style.background = 'rgba(0,0,0,0.3)';
+            return;
+        }
+
+        const tableObj = (this.tables || []).find(t => String(t.id) === String(tableId));
+        const tableName = tableObj ? (tableObj.tableNumber || `Table #${tableObj.id}`) : 'Selected table';
+
+        const conflict = (this.reservations || []).some(r => {
+            if (String(r.tableId) !== String(tableId)) return false;
+            const s = (r.status || '').toUpperCase();
+            if (['CANCELLED', 'REJECTED', 'NO_SHOW'].includes(s)) return false;
+
+            const existIn = r.reservationDate;
+            const existOut = r.checkOutDate || r.reservationDate;
+            if (!existIn) return false;
+
+            if (existIn === existOut && checkIn === checkOut) {
+                return existIn === checkIn;
+            }
+            return checkIn < existOut && checkOut > existIn;
+        });
+
+        if (conflict) {
+            statusEl.innerHTML = `<i class="fa-solid fa-circle-xmark" style="color:#ef4444;"></i> <strong>Conflict:</strong> ${tableName} is already booked for these dates.`;
+            statusEl.style.color = '#ef4444';
+            statusEl.style.borderColor = '#ef4444';
+            statusEl.style.background = 'rgba(239, 68, 68, 0.12)';
+        } else {
+            statusEl.innerHTML = `<i class="fa-solid fa-circle-check" style="color:#10b981;"></i> <strong>Available:</strong> ${tableName} is ready for booking!`;
+            statusEl.style.color = '#10b981';
+            statusEl.style.borderColor = '#10b981';
+            statusEl.style.background = 'rgba(16, 185, 129, 0.12)';
+        }
     },
 
     async handleNewReservationSubmit(e) {
@@ -708,98 +794,170 @@ const ReservationsComponent = {
 
         const user = window.AuthManager ? AuthManager.currentUser : null;
 
+        const nameEl = document.getElementById('newResCustomerName');
+        const phoneEl = document.getElementById('newResCustomerPhone');
+        const emailEl = document.getElementById('newResCustomerEmail');
         const custEl = document.getElementById('newResCustomerId');
         const tableEl = document.getElementById('newResTableId');
-        const dateEl = document.getElementById('newResDate');
-        const timeEl = document.getElementById('newResTime');
+        const inDateEl = document.getElementById('newResCheckInDate');
+        const outDateEl = document.getElementById('newResCheckOutDate');
         const partyEl = document.getElementById('newResPartySize');
+        const payEl = document.getElementById('newResPaymentStatus');
         const notesEl = document.getElementById('newResNotes');
 
-        const customerId = custEl?.value ? parseInt(custEl.value) : (user ? user.id : null);
+        const customerName = (nameEl?.value || '').trim();
+        const contactNumber = (phoneEl?.value || '').trim();
+        const email = (emailEl?.value || '').trim();
+        const customerId = custEl?.value ? parseInt(custEl.value) : (user && user.role === 'CUSTOMER' ? user.id : null);
         const tableId = parseInt(tableEl?.value);
-        const reservationDate = dateEl?.value;
-        const reservationTime = timeEl?.value;
+        const checkInDate = inDateEl?.value;
+        const checkOutDate = outDateEl?.value;
         const partySize = parseInt(partyEl?.value);
+        const paymentStatus = payEl?.value || 'Pending';
         const specialRequest = (notesEl?.value || '').trim();
 
-        // Validation
-        if (!customerId) {
-            NotificationManager.showToast('Please select a customer.', true);
-            if (custEl) custEl.style.borderColor = '#ef4444';
+        // 1. Validate Customer Name
+        if (!customerName) {
+            NotificationManager.showToast('Please enter the customer name.', true);
+            if (nameEl) nameEl.focus();
             return;
         }
-        if (!tableId || isNaN(tableId)) {
-            return FormValidator.markInvalid(tableEl, 'Please select a dining table.');
-        }
-        const dVal = FormValidator.validateDate(reservationDate, 'Reservation Date', false);
-        if (!dVal.valid) return FormValidator.markInvalid(dateEl, dVal.message);
-        if (!reservationTime) return FormValidator.markInvalid(timeEl, 'Please enter a dining time.');
-        const pVal = FormValidator.validateNumber(partySize, 'Guest Count', 1, 50, true);
-        if (!pVal.valid) return FormValidator.markInvalid(partyEl, pVal.message);
 
-        // Validation against past time, daily limit, and table conflict
+        // 2. Validate Contact Number
+        if (!contactNumber) {
+            NotificationManager.showToast('Please enter a contact phone number.', true);
+            if (phoneEl) phoneEl.focus();
+            return;
+        }
+
+        // 3. Validate Email Address
+        if (!email) {
+            NotificationManager.showToast('Please enter an email address.', true);
+            if (emailEl) emailEl.focus();
+            return;
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            NotificationManager.showToast('Please enter a valid email address.', true);
+            if (emailEl) emailEl.focus();
+            return;
+        }
+
+        // 4. Validate Table selection
+        if (!tableId || isNaN(tableId)) {
+            NotificationManager.showToast('Please select a room or table.', true);
+            if (tableEl) tableEl.focus();
+            return;
+        }
+
+        // 5. Validate Check-in Date
+        if (!checkInDate) {
+            NotificationManager.showToast('Please select a check-in date.', true);
+            if (inDateEl) inDateEl.focus();
+            return;
+        }
         const todayStr = new Date().toISOString().split('T')[0];
-        if (reservationDate < todayStr) {
-            NotificationManager.showToast('Sorry, bookings for this date and time are fully booked / time is over. Please choose another slot!', true);
+        if (checkInDate < todayStr) {
+            NotificationManager.showToast('Check-in date cannot be in the past.', true);
+            if (inDateEl) inDateEl.focus();
             return;
         }
-        if (reservationDate === todayStr && reservationTime) {
-            const [th, tm] = reservationTime.split(':').map(Number);
-            const slotTime = new Date();
-            slotTime.setHours(th, tm, 0, 0);
-            if (slotTime < new Date(Date.now() - 5 * 60000)) {
-                NotificationManager.showToast('Sorry, bookings for this date and time are fully booked / time is over. Please choose another slot!', true);
-                return;
-            }
-        }
-        const activeToday = this.reservations.filter(r =>
-            r.reservationDate === reservationDate &&
-            !['CANCELLED', 'REJECTED', 'NO_SHOW'].includes((r.status || '').toUpperCase())
-        ).length;
-        if (activeToday >= 30) {
-            NotificationManager.showToast('Sorry, bookings for this date and time are fully booked / time is over. Please choose another slot!', true);
+
+        // 6. Validate Check-out Date (check-out must be after check-in)
+        if (!checkOutDate) {
+            NotificationManager.showToast('Please select a check-out date.', true);
+            if (outDateEl) outDateEl.focus();
             return;
         }
-        const hasCollision = this.reservations.some(r => {
+        if (checkOutDate <= checkInDate) {
+            NotificationManager.showToast('Check-out date must be after check-in date.', true);
+            if (outDateEl) outDateEl.focus();
+            return;
+        }
+
+        // 7. Validate Party Size
+        if (!partySize || isNaN(partySize) || partySize < 1 || partySize > 50) {
+            NotificationManager.showToast('Number of guests must be between 1 and 50.', true);
+            if (partyEl) partyEl.focus();
+            return;
+        }
+
+        // 8. Overlap / double-booking check
+        const conflict = (this.reservations || []).some(r => {
             if (String(r.tableId) !== String(tableId)) return false;
-            if (r.reservationDate !== reservationDate) return false;
-            if (['CANCELLED', 'REJECTED', 'NO_SHOW'].includes((r.status || '').toUpperCase())) return false;
-            if (!reservationTime || !r.reservationTime) return true;
-            const [rh, rm] = (r.reservationTime || '00:00').split(':').map(Number);
-            const [th, tm] = reservationTime.split(':').map(Number);
-            return Math.abs((rh * 60 + rm) - (th * 60 + tm)) < 90;
+            const s = (r.status || '').toUpperCase();
+            if (['CANCELLED', 'REJECTED', 'NO_SHOW'].includes(s)) return false;
+
+            const existIn = r.reservationDate;
+            const existOut = r.checkOutDate || r.reservationDate;
+            if (!existIn) return false;
+
+            if (existIn === existOut && checkInDate === checkOutDate) {
+                return existIn === checkInDate;
+            }
+            return checkInDate < existOut && checkOutDate > existIn;
         });
-        if (hasCollision) {
-            NotificationManager.showToast('Sorry, bookings for this date and time are fully booked / time is over. Please choose another slot!', true);
+
+        if (conflict) {
+            NotificationManager.showToast('The selected room/table is already booked for this period. Please choose another date or room/table.', true);
             return;
         }
 
         const submitBtn = document.getElementById('btnSubmitNewReservation');
-        if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Confirming...'; }
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+        }
 
         try {
-            const res = await ApiService.reservations.create({
+            const payload = {
                 customerId,
+                customerName,
+                contactNumber,
+                email,
                 tableId,
-                reservationDate,
-                reservationTime: reservationTime.length === 5 ? reservationTime + ':00' : reservationTime,
+                checkInDate,
+                reservationDate: checkInDate,
+                checkOutDate,
+                reservationTime: '12:00:00',
                 partySize,
                 specialRequest,
-                status: 'CONFIRMED'
-            });
+                paymentStatus,
+                status: paymentStatus.toLowerCase() === 'paid' ? 'CONFIRMED' : 'PENDING'
+            };
 
-            if (res && res.success) {
+            const res = await ApiService.reservations.create(payload);
+
+            if (res && (res.success || res.id)) {
                 ModalManager.closeModal('newReservationModal');
-                NotificationManager.showToast('Reservation confirmed and created successfully!');
+                const createdRef = (res.data && res.data.id) ? `#RES-${res.data.id}` : (res.id ? `#RES-${res.id}` : 'New reservation');
+                NotificationManager.showToast(`${createdRef} created successfully!`);
+
+                // Instantly sync dashboard table and KPI counters
                 await this.load();
-                if (window.DashboardComponent) window.DashboardComponent.load();
+
+                // Ensure newly created reservation appears in list if user filter was scoped
+                const createdItem = res.data || (res.id ? res : null);
+                if (createdItem && createdItem.id && !this.reservations.some(r => r.id === createdItem.id)) {
+                    this.reservations.unshift(createdItem);
+                    this.renderMetrics();
+                    this.applyFiltersAndRender();
+                }
+
+                if (window.DashboardComponent) {
+                    window.DashboardComponent.load();
+                }
             } else {
                 NotificationManager.showToast(res?.message || 'Failed to create reservation.', true);
             }
         } catch (err) {
+            console.error('[CreateReservationError]', err);
             NotificationManager.showToast(err.message || 'Error creating reservation.', true);
         } finally {
-            if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fa-solid fa-calendar-check"></i> Confirm Reservation'; }
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-calendar-check"></i> Create Reservation';
+            }
         }
     },
 

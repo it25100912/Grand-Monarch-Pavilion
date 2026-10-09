@@ -37,6 +37,12 @@ public class Reservation {
     @Column(nullable = false, length = 50)
     private String status = "PENDING"; // PENDING, CONFIRMED, SEATED, COMPLETED, CANCELLED
 
+    @Column(name = "check_out_date")
+    private LocalDate checkOutDate;
+
+    @Column(name = "payment_status", length = 50)
+    private String paymentStatus = "Pending";
+
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -53,6 +59,12 @@ public class Reservation {
 
     public LocalDate getReservationDate() { return reservationDate; }
     public void setReservationDate(LocalDate reservationDate) { this.reservationDate = reservationDate; }
+
+    public LocalDate getCheckOutDate() { return checkOutDate; }
+    public void setCheckOutDate(LocalDate checkOutDate) { this.checkOutDate = checkOutDate; }
+
+    public String getPaymentStatus() { return paymentStatus; }
+    public void setPaymentStatus(String paymentStatus) { this.paymentStatus = paymentStatus; }
 
     public LocalTime getReservationTime() { return reservationTime; }
     public void setReservationTime(LocalTime reservationTime) { this.reservationTime = reservationTime; }

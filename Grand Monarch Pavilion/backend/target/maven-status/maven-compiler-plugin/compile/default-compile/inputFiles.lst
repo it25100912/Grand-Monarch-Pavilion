@@ -51,7 +51,6 @@ C:\Users\HUAWEI\Desktop\Grand Monarch Pavilion\Grand Monarch Pavilion\backend\sr
 C:\Users\HUAWEI\Desktop\Grand Monarch Pavilion\Grand Monarch Pavilion\backend\src\main\java\com\restaurant\app\customerstaff\service\StaffTaskService.java
 C:\Users\HUAWEI\Desktop\Grand Monarch Pavilion\Grand Monarch Pavilion\backend\src\main\java\com\restaurant\app\customerstaff\service\StaffTaskServiceImpl.java
 C:\Users\HUAWEI\Desktop\Grand Monarch Pavilion\Grand Monarch Pavilion\backend\src\main\java\com\restaurant\app\customerstaff\service\UserAccountFactory.java
-C:\Users\HUAWEI\Desktop\Grand Monarch Pavilion\Grand Monarch Pavilion\backend\src\main\java\com\restaurant\app\EventManagementApplication.java
 C:\Users\HUAWEI\Desktop\Grand Monarch Pavilion\Grand Monarch Pavilion\backend\src\main\java\com\restaurant\app\event\controller\EventController.java
 C:\Users\HUAWEI\Desktop\Grand Monarch Pavilion\Grand Monarch Pavilion\backend\src\main\java\com\restaurant\app\event\controller\EventPackageController.java
 C:\Users\HUAWEI\Desktop\Grand Monarch Pavilion\Grand Monarch Pavilion\backend\src\main\java\com\restaurant\app\event\decorator\EventPackageComponent.java
@@ -74,6 +73,7 @@ C:\Users\HUAWEI\Desktop\Grand Monarch Pavilion\Grand Monarch Pavilion\backend\sr
 C:\Users\HUAWEI\Desktop\Grand Monarch Pavilion\Grand Monarch Pavilion\backend\src\main\java\com\restaurant\app\event\service\EventPackageServiceImpl.java
 C:\Users\HUAWEI\Desktop\Grand Monarch Pavilion\Grand Monarch Pavilion\backend\src\main\java\com\restaurant\app\event\service\EventService.java
 C:\Users\HUAWEI\Desktop\Grand Monarch Pavilion\Grand Monarch Pavilion\backend\src\main\java\com\restaurant\app\event\service\EventServiceImpl.java
+C:\Users\HUAWEI\Desktop\Grand Monarch Pavilion\Grand Monarch Pavilion\backend\src\main\java\com\restaurant\app\EventManagementApplication.java
 C:\Users\HUAWEI\Desktop\Grand Monarch Pavilion\Grand Monarch Pavilion\backend\src\main\java\com\restaurant\app\menu\controller\MenuController.java
 C:\Users\HUAWEI\Desktop\Grand Monarch Pavilion\Grand Monarch Pavilion\backend\src\main\java\com\restaurant\app\menu\dto\MenuItemRequest.java
 C:\Users\HUAWEI\Desktop\Grand Monarch Pavilion\Grand Monarch Pavilion\backend\src\main\java\com\restaurant\app\menu\entity\MenuCategoryEntity.java

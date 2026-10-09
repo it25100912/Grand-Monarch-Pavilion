@@ -11,6 +11,10 @@ public class ReservationResponse {
     private String tableNumber;
     private String reservationDate;
     private String reservationTime;
+    private String checkOutDate;
+    private String paymentStatus;
+    private String customerPhone;
+    private String customerEmail;
     private Integer partySize;
     private String specialRequest;
     private String status;
@@ -23,12 +27,18 @@ public class ReservationResponse {
             this.id = r.getId();
             this.customerId = r.getCustomerId();
             this.customerName = r.getCustomerName();
+            if (r.getCustomer() != null) {
+                this.customerPhone = r.getCustomer().getPhone();
+                this.customerEmail = r.getCustomer().getEmail();
+            }
             this.tableId = r.getTableId();
             this.tableNumber = r.getTableNumber();
             this.reservationDate = DateTimeUtil.formatDate(r.getReservationDate());
+            this.checkOutDate = r.getCheckOutDate() != null ? DateTimeUtil.formatDate(r.getCheckOutDate()) : null;
             this.reservationTime = DateTimeUtil.formatTime(r.getReservationTime());
             this.partySize = r.getPartySize();
             this.specialRequest = r.getSpecialRequest();
+            this.paymentStatus = r.getPaymentStatus() != null ? r.getPaymentStatus() : "Pending";
             this.status = r.getStatus();
             this.createdAt = DateTimeUtil.formatDateTime(r.getCreatedAt());
         }
@@ -63,6 +73,21 @@ public class ReservationResponse {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getCheckOutDate() { return checkOutDate; }
+    public void setCheckOutDate(String checkOutDate) { this.checkOutDate = checkOutDate; }
+
+    public String getCheckInDate() { return reservationDate; }
+    public void setCheckInDate(String checkInDate) { this.reservationDate = checkInDate; }
+
+    public String getPaymentStatus() { return paymentStatus; }
+    public void setPaymentStatus(String paymentStatus) { this.paymentStatus = paymentStatus; }
+
+    public String getCustomerPhone() { return customerPhone; }
+    public void setCustomerPhone(String customerPhone) { this.customerPhone = customerPhone; }
+
+    public String getCustomerEmail() { return customerEmail; }
+    public void setCustomerEmail(String customerEmail) { this.customerEmail = customerEmail; }
 
     public String getCreatedAt() { return createdAt; }
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }

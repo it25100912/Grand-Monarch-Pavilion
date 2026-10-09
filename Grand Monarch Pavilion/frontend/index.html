@@ -1395,14 +1395,14 @@
                         <h2><i class="fa-solid fa-calendar-check" style="color:var(--text-gold); margin-right:8px;"></i>Reservation Management</h2>
                     <p>Live booking dashboard &mdash; status workflow, double-booking prevention, real-time arrivals</p>
                     </div>
-                    <div id="resStaffToolbar" style="display:flex; gap:10px; flex-wrap:wrap;">
-                        <button class="btn-primary" onclick="ReservationsComponent.openNewReservationModal()">
-                            <i class="fa-solid fa-plus"></i> New Reservation
+                    <div id="resStaffToolbar" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                        <button class="btn-primary" id="btnCreateNewReservation" onclick="ReservationsComponent.openNewReservationModal()">
+                            <i class="fa-solid fa-plus"></i> Create New Reservation
                         </button>
-                        <button class="btn-secondary" onclick="ReservationsComponent.clearFilters()">
+                        <button class="btn-secondary" id="btnResClearFilters" onclick="ReservationsComponent.clearFilters()">
                             <i class="fa-solid fa-rotate-left"></i> Clear Filters
                         </button>
-                        <button class="btn-secondary" onclick="ReservationsComponent.load()">
+                        <button class="btn-secondary" id="btnResRefresh" onclick="ReservationsComponent.load()">
                             <i class="fa-solid fa-arrows-rotate"></i> Refresh
                         </button>
                     </div>
@@ -2978,68 +2978,112 @@
         </div>
     </div>
 
-    <!-- 5b. New Reservation Modal (Staff / Admin &mdash; full form with customer picker) -->
+    <!-- 5b. New Reservation Modal (Complete Reservation Workflow) -->
     <div class="modal-overlay" id="newReservationModal">
-        <div class="modal-card" style="max-width:620px;">
+        <div class="modal-card" style="max-width:680px; width:92%;">
             <div class="modal-header" style="background:linear-gradient(135deg, var(--dark-green) 0%, #1a3a28 100%); border-radius:14px 14px 0 0; padding:20px 24px;">
                 <div>
-                    <h3 style="color:#fff; margin:0; font-size:1.15rem;"><i class="fa-solid fa-plus" style="color:var(--text-gold);"></i> Create New Reservation</h3>
-                    <p style="color:rgba(255,255,255,0.65); font-size:0.8rem; margin:4px 0 0 0;">Staff &amp; Manager &mdash; Manual Booking Entry</p>
+                    <h3 style="color:#fff; margin:0; font-size:1.18rem;"><i class="fa-solid fa-calendar-plus" style="color:var(--text-gold);"></i> Create New Reservation</h3>
+                    <p style="color:rgba(255,255,255,0.7); font-size:0.8rem; margin:4px 0 0 0;">Administrative &amp; Guest Booking Management &mdash; Direct Database Reservation</p>
                 </div>
-                <button class="close-btn" onclick="closeModal('newReservationModal')" style="color:#fff; opacity:0.7;">&times;</button>
+                <button class="close-btn" onclick="closeModal('newReservationModal')" style="color:#fff; opacity:0.8;">&times;</button>
             </div>
-            <form id="formNewReservation" onsubmit="ReservationsComponent.handleNewReservationSubmit(event)" novalidate style="padding:20px 24px;">
-                <!-- Customer Selection -->
-                <div style="background:#1b3b2b; border:1px solid rgba(212, 175, 55, 0.2); border-radius:10px; padding:14px; margin-bottom:16px;">
-                    <div style="font-size:0.75rem; text-transform:uppercase; font-weight:800; color:#b0b8b4; letter-spacing:0.5px; margin-bottom:10px;"><i class="fa-solid fa-user"></i> Customer Details</div>
-                    <div class="form-group" style="margin-bottom:0;">
-                        <label>Select Customer <span style="color:#ef4444;">*</span></label>
-                        <select id="newResCustomerId" class="form-control" onchange="ReservationsComponent.onCustomerSelect(this.value)"></select>
+            <form id="formNewReservation" onsubmit="ReservationsComponent.handleNewReservationSubmit(event)" novalidate style="padding:22px 26px;">
+                
+                <!-- 1. Customer Details -->
+                <div style="background:#1b3b2b; border:1px solid rgba(212, 175, 55, 0.25); border-radius:12px; padding:16px; margin-bottom:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <span style="font-size:0.75rem; text-transform:uppercase; font-weight:800; color:#d4af37; letter-spacing:0.5px;">
+                            <i class="fa-solid fa-user-circle"></i> Customer Information
+                        </span>
+                        <div id="resExistingCustomerWrap" style="font-size:0.75rem;">
+                            <select id="newResCustomerId" class="form-control" style="padding:4px 10px; font-size:0.75rem; height:auto; width:auto; display:inline-block;" onchange="ReservationsComponent.onCustomerSelect(this.value)">
+                                <option value="">-- Quick Load Customer --</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
+                    
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label>Customer Name <span style="color:#ef4444;">*</span></label>
+                        <input type="text" id="newResCustomerName" class="form-control" placeholder="Enter guest's full name" required>
+                    </div>
 
-                <!-- Table & Date -->
-                <div style="background:#1b3b2b; border:1px solid rgba(212, 175, 55, 0.2); border-radius:10px; padding:14px; margin-bottom:16px;">
-                    <div style="font-size:0.75rem; text-transform:uppercase; font-weight:800; color:#b0b8b4; letter-spacing:0.5px; margin-bottom:10px;"><i class="fa-solid fa-chair"></i> Table &amp; Schedule</div>
-                    <div class="form-group">
-                        <label>Dining Table <span style="color:#ef4444;">*</span></label>
-                        <select id="newResTableId" class="form-control" required onchange="ReservationsComponent.checkRealtimeTableAvailability('newRes')"></select>
-                    </div>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                         <div class="form-group" style="margin-bottom:0;">
-                            <label>Date <span style="color:#ef4444;">*</span></label>
-                            <input type="date" id="newResDate" class="form-control" required onchange="ReservationsComponent.checkRealtimeTableAvailability('newRes')">
+                            <label>Contact Number <span style="color:#ef4444;">*</span></label>
+                            <input type="tel" id="newResCustomerPhone" class="form-control" placeholder="e.g. 0771234567" required>
                         </div>
                         <div class="form-group" style="margin-bottom:0;">
-                            <label>Time <span style="color:#ef4444;">*</span></label>
-                            <input type="time" id="newResTime" class="form-control" required onchange="ReservationsComponent.checkRealtimeTableAvailability('newRes')">
+                            <label>Email Address <span style="color:#ef4444;">*</span></label>
+                            <input type="email" id="newResCustomerEmail" class="form-control" placeholder="e.g. customer@example.com" required>
                         </div>
                     </div>
                 </div>
 
-                <!-- Guests & Availability -->
-                <div style="display:grid; grid-template-columns:1fr 2fr; gap:12px; margin-bottom:16px;">
-                    <div class="form-group" style="margin-bottom:0;">
-                        <label>Guest Count <span style="color:#ef4444;">*</span></label>
-                        <input type="number" id="newResPartySize" class="form-control" min="1" max="50" placeholder="e.g. 4">
+                <!-- 2. Room/Table & Schedule -->
+                <div style="background:#1b3b2b; border:1px solid rgba(212, 175, 55, 0.25); border-radius:12px; padding:16px; margin-bottom:16px;">
+                    <div style="font-size:0.75rem; text-transform:uppercase; font-weight:800; color:#d4af37; letter-spacing:0.5px; margin-bottom:12px;">
+                        <i class="fa-solid fa-hotel"></i> Room / Table &amp; Dates
                     </div>
-                    <div class="form-group" style="margin-bottom:0;">
-                        <label style="font-size:0.82rem;">Availability Status</label>
-                        <div id="newResAvailabilityStatus" style="padding:10px; border-radius:8px; background:#1b3b2b; border:1px solid rgba(212, 175, 55, 0.2); color:#b0b8b4; font-size:0.82rem; display:flex; align-items:center; gap:8px; height:42px;">
-                            <i class="fa-solid fa-info-circle"></i> Select table &amp; date first
+                    
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label>Select Room/Table <span style="color:#ef4444;">*</span></label>
+                        <select id="newResTableId" class="form-control" required onchange="ReservationsComponent.checkRealtimeTableAvailability('newRes')">
+                            <option value="">-- Select Room/Table --</option>
+                        </select>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Check-in Date <span style="color:#ef4444;">*</span></label>
+                            <input type="date" id="newResCheckInDate" class="form-control" required onchange="ReservationsComponent.onCheckInDateChange()">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Check-out Date <span style="color:#ef4444;">*</span></label>
+                            <input type="date" id="newResCheckOutDate" class="form-control" required onchange="ReservationsComponent.checkRealtimeTableAvailability('newRes')">
                         </div>
                     </div>
+
+                    <!-- Hidden default dining time support -->
+                    <input type="hidden" id="newResTime" value="12:00">
+
+                    <!-- Live Conflict / Availability Banner -->
+                    <div id="newResAvailabilityStatus" style="margin-top:12px; padding:9px 14px; border-radius:8px; background:rgba(0,0,0,0.3); border:1px solid rgba(212, 175, 55, 0.2); color:#b0b8b4; font-size:0.8rem; display:flex; align-items:center; gap:8px;">
+                        <i class="fa-solid fa-circle-info" style="color:var(--text-gold);"></i> Select a room/table and dates to verify live availability
+                    </div>
                 </div>
 
-                <!-- Special Requests -->
-                <div class="form-group">
-                    <label>Special Requests</label>
-                    <textarea id="newResNotes" class="form-control" rows="2" placeholder="Seating preference, allergy, special occasion..."></textarea>
+                <!-- 3. Booking Details, Payment & Special Requests -->
+                <div style="background:#1b3b2b; border:1px solid rgba(212, 175, 55, 0.25); border-radius:12px; padding:16px; margin-bottom:18px;">
+                    <div style="font-size:0.75rem; text-transform:uppercase; font-weight:800; color:#d4af37; letter-spacing:0.5px; margin-bottom:12px;">
+                        <i class="fa-solid fa-receipt"></i> Booking Specs &amp; Payment
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Number of Guests <span style="color:#ef4444;">*</span></label>
+                            <input type="number" id="newResPartySize" class="form-control" min="1" max="50" value="2" required placeholder="e.g. 2">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Payment Status <span style="color:#ef4444;">*</span></label>
+                            <select id="newResPaymentStatus" class="form-control" required>
+                                <option value="Pending">Pending</option>
+                                <option value="Paid">Paid</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Special Requests</label>
+                        <textarea id="newResNotes" class="form-control" rows="2" placeholder="Dietary requirements, floral decorations, poolside preference..."></textarea>
+                    </div>
                 </div>
 
-                <div class="modal-footer" style="padding:16px 0 0 0; border-top:1px solid rgba(212, 175, 55, 0.2); margin-top:4px;">
+                <div class="modal-footer" style="padding:16px 0 0 0; border-top:1px solid rgba(212, 175, 55, 0.2); display:flex; justify-content:flex-end; gap:10px;">
                     <button type="button" class="btn-secondary" onclick="closeModal('newReservationModal')">Cancel</button>
-                    <button type="submit" id="btnSubmitNewReservation" class="btn-primary"><i class="fa-solid fa-calendar-check"></i> Confirm Reservation</button>
+                    <button type="submit" id="btnSubmitNewReservation" class="btn-primary" style="font-weight:700;">
+                        <i class="fa-solid fa-calendar-check"></i> Create Reservation
+                    </button>
                 </div>
             </form>
         </div>
