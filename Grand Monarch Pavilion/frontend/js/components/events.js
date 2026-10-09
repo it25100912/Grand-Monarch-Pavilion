@@ -61,6 +61,11 @@ const EventsComponent = {
             const data = await ApiService.venues.getAll();
             this.venues = data || [];
             this.renderVenues();
+            if (window.VenuesComponent) {
+                window.VenuesComponent.venues = this.venues;
+                window.VenuesComponent.renderShowcase();
+                window.VenuesComponent.renderManagementTable();
+            }
         } catch (err) {
             console.error('[Events] Failed to load venues:', err);
         }
@@ -616,7 +621,10 @@ const EventsComponent = {
     },
 
     openEditVenueModal(id) {
-        const venue = this.venues.find(v => v.id === id);
+        let venue = this.venues.find(v => v.id === id);
+        if (!venue && window.VenuesComponent && window.VenuesComponent.venues) {
+            venue = window.VenuesComponent.venues.find(v => v.id === id);
+        }
         if (!venue) return;
 
         document.getElementById('modalVenueId').value = venue.id;

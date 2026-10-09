@@ -4,6 +4,13 @@
 
 const ModalManager = {
     openModal(id) {
+        if (id === 'venueModal' || id === 'createVenueModal') {
+            if (window.EventsComponent && typeof window.EventsComponent.openCreateVenueModal === 'function') {
+                window.EventsComponent.openCreateVenueModal();
+                return;
+            }
+            id = 'evtVenueModal';
+        }
         const modal = document.getElementById(id);
         if (modal) {
             modal.classList.add('open');
@@ -41,6 +48,9 @@ const ModalManager = {
     },
 
     closeModal(id) {
+        if (id === 'venueModal' || id === 'createVenueModal') {
+            id = 'evtVenueModal';
+        }
         const modal = document.getElementById(id);
         if (modal) {
             modal.classList.remove('open');

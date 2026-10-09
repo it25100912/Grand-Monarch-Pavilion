@@ -12,8 +12,19 @@ const VenuesComponent = {
             this.venues = data || [];
             this.renderShowcase();
             this.renderManagementTable();
+            if (window.EventsComponent) {
+                window.EventsComponent.venues = this.venues;
+            }
         } catch (err) {
             console.error('[Venues Load Error]', err);
+        }
+    },
+
+    openCreateVenueModal() {
+        if (window.EventsComponent && typeof window.EventsComponent.openCreateVenueModal === 'function') {
+            window.EventsComponent.openCreateVenueModal();
+        } else if (window.ModalManager) {
+            window.ModalManager.openModal('evtVenueModal');
         }
     },
 
@@ -230,6 +241,7 @@ const VenuesComponent = {
 };
 
 window.VenuesComponent = VenuesComponent;
+window.openCreateVenueModal = () => VenuesComponent.openCreateVenueModal();
 window.handleVenueSubmit = VenuesComponent.handleSubmit.bind(VenuesComponent);
 window.handleCreateVenueSubmit = VenuesComponent.handleSubmit.bind(VenuesComponent);
 window.handleEditVenueSubmit = VenuesComponent.handleEditSubmit.bind(VenuesComponent);
