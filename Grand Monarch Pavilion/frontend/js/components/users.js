@@ -171,7 +171,7 @@ const UsersComponent = {
                             <i class="fa-solid fa-pen-to-square"></i>
                         </button>
                         ${s.role === 'ADMIN' || s.username === 'admin' ? '' : `
-                        <button class="action-btn" style="background:rgba(255, 255, 255, 0.06); color:${status === 'ACTIVE' ? '#fbbf24' : '#4ade80'}; border:1px solid rgba(255, 255, 255, 0.15); padding:3px 5px; font-size:0.68rem;" onclick="UsersComponent.toggleStatus(${s.id}, '${status === 'ACTIVE' ? 'ON_LEAVE' : 'ACTIVE'}')" title="${status === 'ACTIVE' ? 'Set On Leave' : 'Set Active'}">
+                        <button class="action-btn" style="background:rgba(255, 255, 255, 0.06); color:${status === 'ACTIVE' ? '#fbbf24' : '#4ade80'}; border:1px solid rgba(255, 255, 255, 0.15); padding:3px 5px; font-size:0.68rem;" onclick="UsersComponent.toggleStatus(${s.id}, '${status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'}')" title="${status === 'ACTIVE' ? 'Deactivate (Turn Off)' : 'Activate (Turn On)'}">
                             <i class="fa-solid fa-power-off"></i>
                         </button>
                         <button class="action-btn" style="background:rgba(239, 68, 68, 0.15); color:#f87171; border:1px solid rgba(239, 68, 68, 0.3); padding:3px 5px; font-size:0.68rem;" onclick="UsersComponent.deleteUser(${s.id})" title="Delete Staff Account">
@@ -765,14 +765,14 @@ const UsersComponent = {
     },
 
     async toggleStatus(id, newStatus) {
-        const target = this.staffList.find(s => s.id === id);
-        if (target && (target.role === 'ADMIN' || target.username === 'admin')) {
+        const target = (this.users || []).find(s => s.id === id);
+        if (target && (target.role === 'ADMIN' || target.username === 'admin' || target.id === 1)) {
             NotificationManager.showToast('Administrator status cannot be modified.', true);
             return;
         }
         try {
             const res = await ApiService.users.updateStatus(id, newStatus);
-            if (res && (res.success || res.id)) {
+            if (res && (res.success || res.id || res.message)) {
                 NotificationManager.showToast(`Status updated to ${newStatus}`);
                 await this.load();
             } else {
@@ -784,15 +784,20 @@ const UsersComponent = {
     },
 
     async deleteUser(id) {
-        const target = this.staffList.find(s => s.id === id);
-        if (target && (target.role === 'ADMIN' || target.username === 'admin')) {
+        const target = (this.users || []).find(s => s.id === id);
+        if (target && (target.role === 'ADMIN' || target.username === 'admin' || target.id === 1)) {
             NotificationManager.showToast('Administrator account cannot be deleted.', true);
             return;
         }
-        if (!confirm('Are you sure you want to delete this account?')) return;
+        if (window.AuthManager && window.AuthManager.currentUser && window.AuthManager.currentUser.id === id) {
+            NotificationManager.showToast('You cannot delete your own currently logged-in account.', true);
+            return;
+        }
+        const name = target ? (target.fullName || target.username) : `#${id}`;
+        if (!confirm(`Are you sure you want to delete account "${name}"? This action cannot be undone.`)) return;
         try {
             const res = await ApiService.users.delete(id);
-            if (res && (res.success || res.status === 200)) {
+            if (res && (res.success || res.status === 200 || res.message)) {
                 NotificationManager.showToast('Account deleted successfully.');
                 await this.load();
             } else {
@@ -883,3 +888,5 @@ window.handleEditUserSubmit = (e) => UsersComponent.handleEditSubmit(e);
 window.handleUpdateProfileSubmit = (e) => UsersComponent.handleUpdateProfileSubmit(e);
 window.handleChangePasswordSubmit = (e) => UsersComponent.handleChangePasswordSubmit(e);
 window.renderStaffAvailabilityTable = () => UsersComponent.renderStaffTable();
+window.toggleUserStatus = (id, status) => UsersComponent.toggleStatus(id, status);
+window.deleteUser = (id) => UsersComponent.deleteUser(id);
